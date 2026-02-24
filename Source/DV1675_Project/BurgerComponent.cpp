@@ -29,7 +29,7 @@ void UBurgerComponent::BeginPlay()
 		return;
 	}
 
-	// Set initial materials (both raw)
+	// Set initial materials
 	UpdateMaterial();
 }
 
