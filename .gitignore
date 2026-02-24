@@ -17,7 +17,6 @@ Thumbs.db
 
 # Rider / Visual Studio
 .idea/
-*.sln
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
