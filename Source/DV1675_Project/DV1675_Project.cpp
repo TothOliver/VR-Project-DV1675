@@ -1,6 +1,0 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#include "DV1675_Project.h"
-#include "Modules/ModuleManager.h"
-
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, DV1675_Project, "DV1675_Project" );
