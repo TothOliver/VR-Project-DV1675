@@ -96,6 +96,23 @@ public:
 		ActiveSide.bIsCooking = false;
 	}
 
+	UFUNCTION(BlueprintCallable)
+	void FlipBurger()
+	{
+		bIsSideAUp = !bIsSideAUp;
+
+		// If we're currently cooking, switch which side is active
+		FBurgerSide& NewActiveSide = bIsSideAUp ? SideB : SideA;
+		FBurgerSide& OldActiveSide = bIsSideAUp ? SideA : SideB;
+
+		if (OldActiveSide.bIsCooking)
+		{
+			OldActiveSide.bIsCooking = false;
+			NewActiveSide.bIsCooking = true;
+		}
+
+		UpdateMaterial();
+	}
 
 protected:
 	// Called when the game starts
