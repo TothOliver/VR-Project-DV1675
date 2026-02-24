@@ -55,9 +55,15 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cooking", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* BurgerMesh;
 
+	UPROPERTY(EditAnywhere, Category = "Cooking")
+	UMaterialInterface* RawMaterial;
 
-	UPROPERTY()
-	UMaterialInstanceDynamic* DynamicMaterial;
+	UPROPERTY(EditAnywhere, Category = "Cooking")
+	UMaterialInterface* CookedMaterial;
+
+	UPROPERTY(EditAnywhere, Category = "Cooking")
+	UMaterialInterface* BurnedMaterial;
+
 
 public:	
 	// Sets default values for this component's properties
@@ -67,7 +73,18 @@ public:
 	void StartCooking()
 	{
 		SetComponentTickEnabled(true);
-		FBurgerSide& ActiveSide = bIsSideAUp ? SideA : SideB;
+
+		FVector MeshUp = BurgerMesh->GetUpVector();
+
+		// If the mesh's up vector points down in world space, it's flipped
+		bool bNewSideAUp = MeshUp.Z > 0.f;
+
+		if (bNewSideAUp != bIsSideAUp)
+		{
+			bIsSideAUp = bNewSideAUp;
+		}
+
+		FBurgerSide& ActiveSide = bIsSideAUp ? SideB : SideA;
 		ActiveSide.bIsCooking = true;
 	}
 
@@ -75,7 +92,7 @@ public:
 	void StopCooking()
 	{
 		SetComponentTickEnabled(false);
-		FBurgerSide& ActiveSide = bIsSideAUp ? SideA : SideB;
+		FBurgerSide& ActiveSide = bIsSideAUp ? SideB : SideA;
 		ActiveSide.bIsCooking = false;
 	}
 
@@ -83,6 +100,17 @@ public:
 	void FlipBurger()
 	{
 		bIsSideAUp = !bIsSideAUp;
+
+		// If we're currently cooking, switch which side is active
+		FBurgerSide& NewActiveSide = bIsSideAUp ? SideB : SideA;
+		FBurgerSide& OldActiveSide = bIsSideAUp ? SideA : SideB;
+
+		if (OldActiveSide.bIsCooking)
+		{
+			OldActiveSide.bIsCooking = false;
+			NewActiveSide.bIsCooking = true;
+		}
+
 		UpdateMaterial();
 	}
 

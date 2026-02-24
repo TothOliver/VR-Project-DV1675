@@ -20,23 +20,25 @@ void UBurgerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Automatically find mesh on owner
+	BurgerMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>();
+
 	if (!BurgerMesh)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BurgerComponent: BurgerMesh not assigned on %s"), *GetOwner()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("BurgerMesh not found on %s"), *GetOwner()->GetName());
 		return;
 	}
 
-	DynamicMaterial = BurgerMesh->CreateAndSetMaterialInstanceDynamic(0);
-	
+	// Set initial materials (both raw)
+	UpdateMaterial();
 }
-
 
 // Called every frame
 void UBurgerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FBurgerSide& ActiveSide = bIsSideAUp ? SideA : SideB;
+	FBurgerSide& ActiveSide = bIsSideAUp ? SideB : SideA;
 
 	if (!ActiveSide.bIsCooking || ActiveSide.Doneness == ESideDoneness::Burned)
 		return;
@@ -61,11 +63,37 @@ void UBurgerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UBurgerComponent::UpdateMaterial()
 {
-	if (!DynamicMaterial) return;
+	if (!BurgerMesh) return;
 
-	FBurgerSide& ActiveSide = bIsSideAUp ? SideA : SideB;
+	// Update BOTH sides independently
+	auto UpdateSideMaterial = [&](const FBurgerSide& Side, int32 MaterialIndex)
+		{
+			UMaterialInterface* MatToApply = nullptr;
 
-	float CookAlpha = FMath::Clamp(ActiveSide.CookTime / TimeToBurn, 0.f, 1.f);
+			switch (Side.Doneness)
+			{
+			case ESideDoneness::Raw:
+				MatToApply = RawMaterial;
+				break;
 
-	DynamicMaterial->SetScalarParameterValue("CookAmount", CookAlpha);
+			case ESideDoneness::Cooking:
+			case ESideDoneness::Cooked:
+				MatToApply = CookedMaterial;
+				break;
+
+			case ESideDoneness::Burned:
+				MatToApply = BurnedMaterial;
+				break;
+			}
+
+			if (MatToApply)
+			{
+				BurgerMesh->SetMaterial(MaterialIndex, MatToApply);
+			}
+		};
+
+	// Element 0 = Side A
+	// Element 1 = Side B
+	UpdateSideMaterial(SideA, 0);
+	UpdateSideMaterial(SideB, 1);
 }
