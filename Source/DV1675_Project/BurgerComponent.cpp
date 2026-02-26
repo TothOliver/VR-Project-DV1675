@@ -14,11 +14,7 @@ UBurgerComponent::UBurgerComponent()
 	// ...
 }
 
-<<<<<<< HEAD
-//a
-=======
 
->>>>>>> parent of 6f6f9dc (Revert "Merge branch 'burger'")
 // Called when the game starts
 void UBurgerComponent::BeginPlay()
 {
