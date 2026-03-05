@@ -44,13 +44,14 @@ private:
 	FBurgerSide SideB;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cooking", meta = (AllowPrivateAccess = "true"))
-	float TimeToCook = 5.f;
+	float TimeToCook = 20.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cooking", meta = (AllowPrivateAccess = "true"))
-	float TimeToBurn = 10.f;
+	float TimeToBurn = 30.f;
 
 	UPROPERTY()
 	bool bIsSideAUp = true;
+	bool bIsOnGrill = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cooking", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* BurgerMesh;
@@ -72,28 +73,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StartCooking()
 	{
+		bIsOnGrill = true;
 		SetComponentTickEnabled(true);
-
-		FVector MeshUp = BurgerMesh->GetUpVector();
-
-		// If the mesh's up vector points down in world space, it's flipped
-		bool bNewSideAUp = MeshUp.Z > 0.f;
-
-		if (bNewSideAUp != bIsSideAUp)
-		{
-			bIsSideAUp = bNewSideAUp;
-		}
-
-		FBurgerSide& ActiveSide = bIsSideAUp ? SideB : SideA;
-		ActiveSide.bIsCooking = true;
 	}
 
 	UFUNCTION(BlueprintCallable)
 	void StopCooking()
 	{
+		bIsOnGrill = false;
 		SetComponentTickEnabled(false);
-		FBurgerSide& ActiveSide = bIsSideAUp ? SideB : SideA;
-		ActiveSide.bIsCooking = false;
 	}
 
 	UFUNCTION(BlueprintCallable)

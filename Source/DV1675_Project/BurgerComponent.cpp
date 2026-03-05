@@ -38,10 +38,18 @@ void UBurgerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FBurgerSide& ActiveSide = bIsSideAUp ? SideB : SideA;
-
-	if (!ActiveSide.bIsCooking || ActiveSide.Doneness == ESideDoneness::Burned)
+	if (!bIsOnGrill || !BurgerMesh)
 		return;
+
+	FVector MeshUp = BurgerMesh->GetUpVector();
+	float Dot = FVector::DotProduct(MeshUp, FVector::UpVector);
+
+	// If sideways, do not cook
+	if (FMath::Abs(Dot) < 0.3f)
+		return;
+
+	bool bSideAIsUp = Dot > 0.f;
+	FBurgerSide& ActiveSide = bSideAIsUp ? SideB : SideA;
 
 	ActiveSide.CookTime += DeltaTime;
 
@@ -77,6 +85,7 @@ void UBurgerComponent::UpdateMaterial()
 				break;
 
 			case ESideDoneness::Cooking:
+				break;
 			case ESideDoneness::Cooked:
 				MatToApply = CookedMaterial;
 				break;
